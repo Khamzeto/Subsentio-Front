@@ -71,7 +71,11 @@ const Flashcard: React.FC<FlashcardProps> = ({ word, onMark }) => {
     };
 
     const voiceName = voiceMap[word.sourceLanguage] || 'Heather22k';
-    const encodedWord = btoa(word.word);
+    const encodeToBase64 = str => {
+      return btoa(unescape(encodeURIComponent(str)));
+    };
+
+    const encodedWord = encodeToBase64(word.word);
     const audio = new Audio(
       `https://voice.reverso.net/RestPronunciation.svc/v1/output=json/GetVoiceStream/voiceName=${voiceName}?voiceSpeed=80&inputText=${encodeURIComponent(
         encodedWord

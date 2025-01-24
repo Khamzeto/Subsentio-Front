@@ -1,6 +1,6 @@
 {
   "signIn": {
-    "title": "Bei Trancy anmelden",
+    "title": "Bei SubSentio anmelden",
     "emailLabel": "E-Mail",
     "emailPlaceholder": "Geben Sie Ihre E-Mail ein",
     "passwordLabel": "Passwort",
@@ -10,10 +10,11 @@
     "noAccount": "Noch kein Konto?",
     "terms": "Nutzungsbedingungen",
     "privacy": "Datenschutzrichtlinie",
-    "agreement": "Mit der Anmeldung stimmen Sie unseren"
+    "agreement": "Mit der Anmeldung stimmen Sie unseren",
+    "and": "und"
   },
   "signUp": {
-    "title": "Registrieren bei Trancy",
+    "title": "Registrieren bei SubSentio",
     "usernameLabel": "Benutzername",
     "usernamePlaceholder": "Geben Sie Ihren Benutzernamen ein",
     "emailLabel": "E-Mail",
@@ -204,5 +205,37 @@
     "invalidCodeOrExpired": "Ungültiger oder abgelaufener Code",
     "passwordResetSuccess": "Passwort erfolgreich zurückgesetzt",
     "passwordResetError": "Fehler beim Zurücksetzen des Passworts"
-  }
+  },
+  "emailVerification": {
+    "notifications": {
+      "verifyEmail": "Bitte bestätigen Sie Ihre E-Mail-Adresse.",
+      "loading": "Überprüfung..."
+    },
+    "codeLabel": "Bestätigungscode",
+    "codePlaceholder": "Geben Sie den Code ein, der an Ihre E-Mail gesendet wurde",
+    "verifyButton": "Bestätigen"
+  },
+  "change": {
+    "currentPassword": "Geben Sie Ihr aktuelles Passwort ein"
+  },
+  "paymentModal": {
+    "title": "Abonnement-Einrichtung",
+    "subtitle": "Entfalten Sie Ihr volles Potenzial und lassen Sie die Welt Ihren Erfolg sehen",
+    "priceDescription": "Nur für",
+    "planFeatures": "Alle Funktionen des Basisplans, einschließlich unbegrenzter Doppeltitel, Übersetzung, Untertitelspeicherung und Worttraining.",
+    "dataConsent": {
+      "label": "Ich bestätige, dass ich die",
+      "link": "öffentliche Angebotsvereinbarung",
+      "consent": "gelesen habe, ihre Bedingungen akzeptiere und der Verarbeitung meiner persönlichen Daten zustimme."
+    },
+    "autoPayment": {
+      "label": "Ich stimme der automatischen Zahlung zu"
+    },
+    "errorMessage": "Etwas ist schief gelaufen 😔. Bitte versuchen Sie es später noch einmal.",
+    "buttons": {
+      "cancel": "Abbrechen",
+      "confirm": "Kauf abschließen"
+    }
+  },
+  "date_end": "Enddatum des Abonnements"
 }

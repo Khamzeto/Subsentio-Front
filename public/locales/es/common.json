@@ -1,6 +1,6 @@
 {
   "signIn": {
-    "title": "Iniciar sesión en Trancy",
+    "title": "Iniciar sesión en SubSentio",
     "emailLabel": "Correo electrónico",
     "emailPlaceholder": "Ingresa tu correo electrónico",
     "passwordLabel": "Contraseña",
@@ -10,10 +10,11 @@
     "noAccount": "¿No tienes cuenta?",
     "terms": "Términos de uso",
     "privacy": "Política de privacidad",
-    "agreement": "Al iniciar sesión, aceptas nuestros"
+    "agreement": "Al iniciar sesión, aceptas nuestros",
+    "and": "y"
   },
   "signUp": {
-    "title": "Regístrate en Trancy",
+    "title": "Regístrate en SubSentio",
     "usernameLabel": "Nombre de usuario",
     "usernamePlaceholder": "Ingresa tu nombre de usuario",
     "emailLabel": "Correo electrónico",
@@ -204,5 +205,37 @@
     "invalidCodeOrExpired": "Código inválido o expirado",
     "passwordResetSuccess": "Contraseña restablecida con éxito",
     "passwordResetError": "Error al restablecer la contraseña"
-  }
+  },
+  "emailVerification": {
+    "notifications": {
+      "verifyEmail": "Por favor verifica tu correo electrónico.",
+      "loading": "Verificando..."
+    },
+    "codeLabel": "Código de verificación",
+    "codePlaceholder": "Introduce el código enviado a tu correo electrónico",
+    "verifyButton": "Verificar"
+  },
+  "change": {
+    "currentPassword": "Introduce tu contraseña actual"
+  },
+  "paymentModal": {
+    "title": "Configuración de Suscripción",
+    "subtitle": "Libera todo tu potencial y deja que el mundo vea tu éxito",
+    "priceDescription": "Sólo por",
+    "planFeatures": "Todas las funciones del plan Básico, incluyendo subtítulos duales ilimitados, traducción, guardado de subtítulos y entrenamiento de palabras.",
+    "dataConsent": {
+      "label": "Confirmo que he leído la",
+      "link": "oferta pública",
+      "consent": "acepto sus términos y doy mi consentimiento para el tratamiento de mis datos personales."
+    },
+    "autoPayment": {
+      "label": "Acepto el pago automático"
+    },
+    "errorMessage": "Algo salió mal 😔. Por favor, inténtalo de nuevo más tarde.",
+    "buttons": {
+      "cancel": "Cancelar",
+      "confirm": "Completar compra"
+    }
+  },
+  "date_end": "Fecha de finalización de la suscripción"
 }

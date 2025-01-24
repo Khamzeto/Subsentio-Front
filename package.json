@@ -37,6 +37,7 @@
     "zustand": "^5.0.2"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^15.1.6",
     "@types/chrome": "^0.0.284",
     "@types/node": "18.7.18",
     "@types/react": "18.0.20",

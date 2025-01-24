@@ -16,7 +16,9 @@ import { IconTargetArrow } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 
 type DailyGoalSelectorProps = {
+  /** Оптимистичное изменение локального стейта цели */
   onSetGoal: (goal: number) => void;
+  /** Вызов серверных запросов, чтобы данные были актуальными */
   fetchUnmasteredWords: () => Promise<void>;
 };
 
@@ -24,13 +26,14 @@ const DailyGoalSelector: React.FC<DailyGoalSelectorProps> = ({
   onSetGoal,
   fetchUnmasteredWords,
 }) => {
-  const { t } = useTranslation(); // <-- используем неймспейс common
+  const { t } = useTranslation();
   const { profile, updateDayWords, fetchProfile } = useProfileStore();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   const [dailyGoal, setDailyGoal] = useState<number>(20);
 
   useEffect(() => {
+    // При первом рендере подгружаем профиль (на случай, если ещё не загружен)
     fetchProfile();
   }, [fetchProfile]);
 
@@ -41,13 +44,18 @@ const DailyGoalSelector: React.FC<DailyGoalSelectorProps> = ({
   }, [profile]);
 
   const handleConfirm = async () => {
+    // 1. Сразу отправляем обновление на сервер
     await updateDayWords(dailyGoal);
+
+    // 2. «Оптимистично» уведомляем родителя о смене цели
     onSetGoal(dailyGoal);
-    // @ts-ignore
+
+    // Закрываем модалку
     onOpenChange(false);
-    if (fetchUnmasteredWords) {
-      await fetchUnmasteredWords();
-    }
+
+    // 3. Дополнительно подгружаем слова,
+    //    статистику и т. п. (в родительском компоненте)
+    await fetchUnmasteredWords();
   };
 
   // Создание меток для ползунка
@@ -66,7 +74,9 @@ const DailyGoalSelector: React.FC<DailyGoalSelectorProps> = ({
         <IconTargetArrow size={20} stroke={1.5} className="text-black dark:text-white" />
         {t('dailyGoalSelector.setGoalButton')}
       </Button>
-      {/* @ts-ignore */}
+
+      {/* Модальное окно */}
+      {/* @ts-ignore (ошибка типов NextUI) */}
       <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
         {/* @ts-ignore */}
         <ModalContent>

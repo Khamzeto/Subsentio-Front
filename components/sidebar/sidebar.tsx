@@ -21,23 +21,48 @@ import {
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import useLanguageStore from '../store/useLanguageStore';
+import useProfileStore from '../store/useProfileStore';
+import useAuthStore from '../auth/authStore';
 
 interface SidebarWrapperProps {
   lang: string; // Принимаем язык как prop
   t: (key: string) => string;
 }
 
-export const SidebarWrapper = ({ t }: SidebarWrapperProps) => {
+export const SidebarWrapper = ({ t, lang }: SidebarWrapperProps) => {
+  const { profile } = useProfileStore();
+
   const pathname = usePathname();
   const router = useRouter();
   const { collapsed, setCollapsed } = useSidebarContext();
 
-  const handleSettingsClick = () => {
-    router.push('/settings'); // Переход на страницу настроек
-  };
+  useEffect(() => {
+    const handleMessage = event => {
+      console.log('Получено сообщение:', event);
+      console.log('Источник сообщения:', event.origin);
+
+      if (
+        event.origin.startsWith('chrome-extension://') &&
+        event.data.type === 'LOGOUT_REQUEST'
+      ) {
+        console.log('Получен запрос на выход из расширения');
+
+        const { clearTokens } = useAuthStore.getState();
+        clearTokens();
+
+        event.source.postMessage({ success: true }, event.origin);
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+
+    return () => {
+      window.removeEventListener('message', handleMessage);
+    };
+  }, []);
 
   return (
-    <aside className="h-screen bg-green z-[600] sticky top-0">
+    <aside className="h-screen bg-green z-[20] sticky top-0">
       {collapsed ? <div className={Sidebar.Overlay()} onClick={setCollapsed} /> : null}
       <div className={Sidebar({ collapsed })}>
         <div className="flex pl-4 mt-2  items-center gap-[8px]">
@@ -139,28 +164,37 @@ export const SidebarWrapper = ({ t }: SidebarWrapperProps) => {
           </div>
 
           <div className={Sidebar.Footer()}>
-            <div
-              // Переход на страницу премиум
-              className="w-full px-6 py-6 border-2 border-blue-400 rounded-[20px] cursor-pointer bg-transparent  text-center flex flex-col items-center gap-3"
-            >
-              <div className="text-[26px]">💎</div> {/* Смайлик сверху */}
-              <h2 className="text-[15px]  font-[600] w-full dark:text-blue-400 text-blue-500">
-                {t('plans.upgradeToPremium')}
-              </h2>
-              <p className="text-[13px] text-gray-600 dark:text-gray-400 w-[100%]">
-                {t('other.descPremium')}
-              </p>
-              <Button
-                onClick={() => router.push('/plans')}
-                className="bg-blue-500  text-white w-full mt-2"
+            {profile?.plan === 'free' && (
+              <div
+                // Переход на страницу премиум
+                className="w-full px-6 py-6 border-2 border-blue-400 rounded-[20px] cursor-pointer bg-transparent text-center flex flex-col items-center gap-3"
               >
-                {t('other.to')}
-              </Button>
-            </div>
+                <div className="text-[26px]">💎</div> {/* Смайлик сверху */}
+                <h2 className="text-[15px] font-[600] w-full dark:text-blue-400 text-blue-500">
+                  {t('plans.upgradeToPremium')}
+                </h2>
+                <p className="text-[13px] text-gray-600 dark:text-gray-400 w-[100%]">
+                  {t('other.descPremium')}
+                </p>
+                <Button
+                  onClick={() => router.push('/plans')}
+                  className="bg-blue-500 text-white w-full mt-2"
+                >
+                  {t('other.to')}
+                </Button>
+              </div>
+            )}
 
             <Button
               leftIcon={<IconHeadset size={24} />}
-              onClick={() => router.push('/support')}
+              onClick={() => {
+                // Проверяем язык и открываем соответствующий URL в новой вкладке
+                if (lang === 'ru') {
+                  window.open('https://subsentio.online/ru/contacts', '_blank');
+                } else {
+                  window.open('https://subsentio.online/contacts', '_blank');
+                }
+              }}
               radius="md" // Радиус скругления
               size="md" // Размер кнопки
               color="warning"

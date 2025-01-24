@@ -1,6 +1,6 @@
 {
   "signIn": {
-    "title": "Accedi a Trancy",
+    "title": "Accedi a SubSentio",
     "emailLabel": "E-mail",
     "emailPlaceholder": "Inserisci la tua e-mail",
     "passwordLabel": "Password",
@@ -10,10 +10,11 @@
     "noAccount": "Non hai un account?",
     "terms": "Termini di utilizzo",
     "privacy": "Informativa sulla privacy",
-    "agreement": "Accedendo, accetti i nostri"
+    "agreement": "Accedendo, accetti i nostri",
+    "and": "e"
   },
   "signUp": {
-    "title": "Iscriviti a Trancy",
+    "title": "Iscriviti a SubSentio",
     "usernameLabel": "Nome utente",
     "usernamePlaceholder": "Inserisci il tuo nome utente",
     "emailLabel": "E-mail",
@@ -204,5 +205,37 @@
     "invalidCodeOrExpired": "Codice non valido o scaduto",
     "passwordResetSuccess": "Password reimpostata con successo",
     "passwordResetError": "Errore durante il reset della password"
-  }
+  },
+  "emailVerification": {
+    "notifications": {
+      "verifyEmail": "Per favore verifica la tua email.",
+      "loading": "Verifica in corso..."
+    },
+    "codeLabel": "Codice di verifica",
+    "codePlaceholder": "Inserisci il codice inviato alla tua email",
+    "verifyButton": "Verifica"
+  },
+  "change": {
+    "currentPassword": "Inserisci la tua password attuale"
+  },
+  "paymentModal": {
+    "title": "Impostazione dell'abbonamento",
+    "subtitle": "Libera tutto il tuo potenziale e lascia che il mondo veda il tuo successo",
+    "priceDescription": "Solo per",
+    "planFeatures": "Tutte le funzionalità del piano Base, inclusi sottotitoli doppi illimitati, traduzione, salvataggio dei sottotitoli e allenamento di parole.",
+    "dataConsent": {
+      "label": "Confermo di aver letto",
+      "link": "l'offerta pubblica",
+      "consent": "accetto i suoi termini e acconsento al trattamento dei miei dati personali."
+    },
+    "autoPayment": {
+      "label": "Acconsento al pagamento automatico"
+    },
+    "errorMessage": "Qualcosa è andato storto 😔. Per favore riprova più tardi.",
+    "buttons": {
+      "cancel": "Annulla",
+      "confirm": "Completa l'acquisto"
+    }
+  },
+  "date_end": "Data di fine abbonamento"
 }

@@ -14,7 +14,7 @@ export const NavbarWrapper = ({ children, t }: Props) => {
       {/* Закрепленная панель */}
       <Navbar
         isBordered
-        className="fixed top-0 left-0 w-full z-50  dark:bg-[#222222]" // Добавили фиксацию
+        className="fixed top-0 left-0 w-full z-[19]  dark:bg-[#222222]" // Добавили фиксацию
         classNames={{
           wrapper: 'w-full max-w-full',
         }}

@@ -20,6 +20,7 @@ import {
   IconMenuDeep,
   IconVolume2,
 } from '@tabler/icons-react';
+import useProfileStore from '../store/useProfileStore';
 
 type Word = {
   _id: string;
@@ -31,6 +32,10 @@ type Word = {
     gender: string;
   }[];
   learned: boolean;
+  t: string;
+  // Если нужно сортировать по дате на клиенте, убедитесь,
+  // что здесь есть что-то вроде:
+  // createdAt: string;
 };
 
 const partOfSpeechMap: Record<string, string> = {
@@ -59,41 +64,53 @@ export default function WordsList({ initialLang }: { initialLang: string }) {
   const [error, setError] = useState<string | null>(null);
   const [selectedWord, setSelectedWord] = useState<Word | null>(null);
   const subtitleDetailsRef = useRef<HTMLDivElement | null>(null);
-
+  const { profile } = useProfileStore();
+  // Стейты для фильтра и сортировки
   const [activeFilter, setActiveFilter] = useState<string>('all');
   const [sortOrder, setSortOrder] = useState<string>('date_desc');
   const [sortLabel, setSortLabel] = useState<string>(t('wordsList.sortByDateDesc'));
+
+  // Скрыть/показать переводы
   const [hiddenTranslations, setHiddenTranslations] = useState<boolean>(false);
+
+  // Для отображения иконки при проигрывании аудио
   const [playingWordId, setPlayingWordId] = useState<string | null>(null);
+
+  // При первом рендере выставляем язык
   useEffect(() => {
     if (i18n.language !== initialLang) {
-      i18n.changeLanguage(initialLang); // Установка языка до рендера
+      i18n.changeLanguage(initialLang);
     }
   }, [initialLang, i18n]);
 
-  // Загружаем слова
+  /**
+   * Загрузка слов с бэкенда
+   *
+   * Вариант 1: Если ваш бэкенд поддерживает сортировку, просто передаёте `sort` в запрос:
+   */
   const fetchWords = async (filter: string, sort: string) => {
     setLoading(true);
     setError(null);
 
     try {
-      const response = await $api.get(`/words?filter=${filter}`);
+      // Пример: передаём и фильтр, и сортировку в GET-запрос
+      const response = await $api.get(`/words?filter=${filter}&sort=${sort}`);
       setWords(response.data.words);
     } catch (err: any) {
-      // Используем локализованную строку
       setError(t('wordsList.loadingError'));
     } finally {
       setLoading(false);
     }
   };
 
+  // Подгружаем слова при изменении фильтра или сортировки
   useEffect(() => {
     fetchWords(activeFilter, sortOrder);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeFilter, sortOrder]);
 
-  // Проигрывание аудио
-  const handleAudioPlay = (word: string, sourceLang: string, wordId: string) => {
+  // Обработчик нажатия кнопки аудио
+  const handleAudioPlay = (word: string, sourceLanguage: string, wordId: string) => {
     const voiceMap: Record<string, string> = {
       ru: 'Alyona22k',
       es: 'Maria22k',
@@ -104,8 +121,14 @@ export default function WordsList({ initialLang }: { initialLang: string }) {
       en: 'Heather22k',
     };
 
-    const voiceName = voiceMap[sourceLang] || 'Heather22k';
-    const encodedWord = btoa(word);
+    const voiceName = voiceMap[sourceLanguage] || 'Heather22k';
+
+    // Кодируем текст в Base64 с учетом UTF-8
+    const encodeToBase64 = str => {
+      return btoa(unescape(encodeURIComponent(str)));
+    };
+
+    const encodedWord = encodeToBase64(word);
 
     const audio = new Audio(
       `https://voice.reverso.net/RestPronunciation.svc/v1/output=json/GetVoiceStream/voiceName=${voiceName}?voiceSpeed=80&inputText=${encodeURIComponent(
@@ -126,13 +149,13 @@ export default function WordsList({ initialLang }: { initialLang: string }) {
     });
   };
 
-  // Фильтр
+  // Смена фильтра
   const handleFilterChange = (filter: string) => {
     setActiveFilter(filter);
     fetchWords(filter, sortOrder);
   };
 
-  // Сортировка
+  // Смена сортировки
   const handleSortChange = (sort: string, label: string) => {
     setSortOrder(sort);
     setSortLabel(label);
@@ -152,7 +175,7 @@ export default function WordsList({ initialLang }: { initialLang: string }) {
     }
   };
 
-  // Обновление статуса "выучено"
+  // Изменение статуса “выучено”
   const toggleLearnedStatus = async (id: string, currentStatus: boolean) => {
     try {
       const response = await $api.patch(`/words/${id}/learned`, {
@@ -171,7 +194,7 @@ export default function WordsList({ initialLang }: { initialLang: string }) {
     }
   };
 
-  // Закрытие деталей
+  // Закрыть детальное окошко при клике вне него
   const handleOutsideClick = (event: MouseEvent) => {
     if (
       subtitleDetailsRef.current &&
@@ -204,6 +227,7 @@ export default function WordsList({ initialLang }: { initialLang: string }) {
           <h1 className="text-3xl font-bold">{t('wordsList.title')}</h1>
         </div>
 
+        {/* Фильтры и сортировка */}
         <div
           className="
             mb-4
@@ -211,7 +235,7 @@ export default function WordsList({ initialLang }: { initialLang: string }) {
             md:flex-row md:items-center md:gap-4 md:justify-between md:flex-nowrap
           "
         >
-          {/* Фильтры */}
+          {/* Блок фильтров */}
           <div className="flex flex-wrap gap-3 w-full md:max-w-[calc(100%-200px)] mb-6">
             <Button
               variant="bordered"
@@ -253,7 +277,8 @@ export default function WordsList({ initialLang }: { initialLang: string }) {
             </Button>
           </div>
 
-          <div className="flex justify-end items-start gap-2 mt-[-20px] w-[100%] ">
+          {/* Кнопки “Скрыть переводы” и “Сортировка” */}
+          <div className="flex justify-end items-start gap-2 mt-[-20px] w-[100%]">
             <Button
               variant="bordered"
               isIconOnly
@@ -264,7 +289,6 @@ export default function WordsList({ initialLang }: { initialLang: string }) {
               className="w-10 h-10 p-0 flex items-center justify-center"
             />
 
-            {/* @ts-ignore */}
             <Dropdown>
               <DropdownTrigger>
                 <Button className="w-full md:w-auto md:mt-0">{sortLabel}</Button>
@@ -309,12 +333,12 @@ export default function WordsList({ initialLang }: { initialLang: string }) {
           </div>
         </div>
 
-        {/* Количество слов */}
+        {/* Сколько всего слов */}
         <p className="mb-4 text-gray-400 text-base">
           {t('wordsList.wordsCount', { count: words.length })}
         </p>
 
-        {/* Ошибка, если есть */}
+        {/* Ошибка при загрузке */}
         {error && <p className="text-red-500 font-semibold mb-4">{error}</p>}
 
         {/* Список слов */}
@@ -328,15 +352,15 @@ export default function WordsList({ initialLang }: { initialLang: string }) {
                 md:flex-row md:items-center
               "
             >
-              {/* Слово + аудио */}
+              {/* Левая часть: само слово + кнопка аудио */}
               <div className="md:flex-[2] w-[100%]">
                 <div className="flex items-center gap-2">
                   <p className="font-bold text-base text-foreground">{word.word}</p>
                   <button
-                    className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
+                    className="p-1 rounded hover:bg-gray-200 z-[2] relative dark:hover:bg-gray-700"
                     aria-label="Play pronunciation"
                     onClick={() =>
-                      handleAudioPlay(word.word, (word as any).sourceLang, word._id)
+                      handleAudioPlay(word.word, (word as any).sourceLanguage, word._id)
                     }
                   >
                     <IconVolume2
@@ -351,8 +375,8 @@ export default function WordsList({ initialLang }: { initialLang: string }) {
                 </p>
               </div>
 
-              {/* Перевод */}
-              <div className="flex gap-1 w-full justify-start items-start relative flex-wrap md:left-[0px] max-w-[50%] md:mt-0 text-left">
+              {/* Средняя часть: переводы */}
+              <div className="flex gap-1 w-full md:mt-0 mt-3 justify-start items-start relative flex-wrap md:left-[0px] max-w-[50%] md:mt-0 text-left">
                 <div
                   className={`text-sm transition-all duration-300 flex gap-1 flex-wrap items-start ${
                     hiddenTranslations
@@ -363,7 +387,6 @@ export default function WordsList({ initialLang }: { initialLang: string }) {
                     if (hiddenTranslations) {
                       e.currentTarget.classList.remove(
                         'text-transparent',
-                        'bg-gray-400',
                         'dark:bg-[#222222]'
                       );
                       e.currentTarget.classList.add('text-default-800', 'bg-transparent');
@@ -373,7 +396,6 @@ export default function WordsList({ initialLang }: { initialLang: string }) {
                     if (hiddenTranslations) {
                       e.currentTarget.classList.add(
                         'text-transparent',
-                        'bg-gray-400',
                         'dark:bg-[#222222]'
                       );
                       e.currentTarget.classList.remove(
@@ -385,6 +407,7 @@ export default function WordsList({ initialLang }: { initialLang: string }) {
                 >
                   {word.translations.map((translation, index) => (
                     <span key={index}>
+                      {/* Преобразуем gender, если указана часть речи */}
                       <span className="font-bold">
                         {translation.gender
                           ? translation.gender
@@ -397,13 +420,11 @@ export default function WordsList({ initialLang }: { initialLang: string }) {
                                 if (trimmedPart.startsWith('Adjective')) {
                                   return 'adj';
                                 }
-                                return partOfSpeechMap[trimmedPart] || '';
+                                return partOfSpeechMap[trimmedPart] || trimmedPart;
                               })
                               .join(' / ') + ': '
                           : ''}
                       </span>
-
-                      {/* Если нет перевода, показываем локализованную строку */}
                       <span>{translation.russian || t('wordsList.noTranslation')}</span>
                       {index < word.translations.length - 1 && <span>, </span>}
                     </span>
@@ -411,7 +432,7 @@ export default function WordsList({ initialLang }: { initialLang: string }) {
                 </div>
               </div>
 
-              {/* Действия (learned/delete/details) */}
+              {/* Правая часть: кнопки действий (learned/delete/details) */}
               <div
                 className="
                   md:flex-[2]
@@ -420,7 +441,7 @@ export default function WordsList({ initialLang }: { initialLang: string }) {
                 "
               >
                 <div className="flex items-center gap-2 md:gap-1">
-                  {/* Кнопка: learned/unlearned */}
+                  {/* Кнопка “выучено” */}
                   <Tooltip
                     content={
                       word.learned
@@ -441,7 +462,7 @@ export default function WordsList({ initialLang }: { initialLang: string }) {
                     </Button>
                   </Tooltip>
 
-                  {/* Удалить слово */}
+                  {/* Кнопка “Удалить” */}
                   <Tooltip content={t('wordsList.delete')} placement="top" color="error">
                     <Button
                       isIconOnly
@@ -459,7 +480,7 @@ export default function WordsList({ initialLang }: { initialLang: string }) {
                     </Button>
                   </Tooltip>
 
-                  {/* Детали слова */}
+                  {/* Кнопка “Детали слова” */}
                   <Tooltip content={t('wordsList.details')} placement="top">
                     <Button
                       isIconOnly
@@ -478,7 +499,7 @@ export default function WordsList({ initialLang }: { initialLang: string }) {
         </div>
       </div>
 
-      {/* Окно деталей слова */}
+      {/* Подробные детали (по клику “Детали слова”) */}
       {selectedWord && (
         <div ref={subtitleDetailsRef}>
           <SubtitleDetails
@@ -488,10 +509,12 @@ export default function WordsList({ initialLang }: { initialLang: string }) {
             setWords={setWords}
             translation={selectedWord.translations}
             onClose={() => setSelectedWord(null)}
-            targetLang="en"
-            sourceLang="ru"
+            targetLang={profile.learningLanguage}
+            sourceLang={profile.nativeLanguage}
             initialLang={initialLang}
             accessToken="your-access-token"
+            profile={profile}
+            t={t}
           />
         </div>
       )}

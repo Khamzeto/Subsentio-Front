@@ -9,7 +9,7 @@ import $api from '@/config/api/api';
 
 export default function Dashboard({ initialLang }: { initialLang: string }) {
   const { t, i18n } = useTranslation(); // <-- Хук для использования перевода
-  const { profile, fetchProfile } = useProfileStore();
+  const { profile } = useProfileStore();
 
   useEffect(() => {
     if (i18n.language !== initialLang) {
@@ -32,10 +32,6 @@ export default function Dashboard({ initialLang }: { initialLang: string }) {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
-  useEffect(() => {
-    fetchProfile();
-  }, []);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -170,7 +166,7 @@ export default function Dashboard({ initialLang }: { initialLang: string }) {
                   content: 'font-[500] text-sm text-center',
                 }}
               >
-                {t('dashboard.remainingWords', { count: remainingWords })}
+                {t('dashboard.remainingWords', { count: Math.max(0, remainingWords) })}
               </Chip>
             </div>
           </div>

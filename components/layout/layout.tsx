@@ -50,7 +50,8 @@ export const Layout = ({ children, lang }: Props) => {
     >
       <section className="flex">
         {/* @ts-ignore */}
-        <SidebarWrapper t={t} /> {/* Sidebar автоматически получит язык через i18n */}
+        <SidebarWrapper t={t} lang={language} />{' '}
+        {/* Sidebar автоматически получит язык через i18n */}
         {/* @ts-ignore */}
         <NavbarWrapper t={t}>{children}</NavbarWrapper>
       </section>

@@ -1,6 +1,6 @@
 {
   "signIn": {
-    "title": "登录 Trancy",
+    "title": "登录 SubSentio",
     "emailLabel": "邮箱",
     "emailPlaceholder": "请输入您的邮箱",
     "passwordLabel": "密码",
@@ -10,10 +10,11 @@
     "noAccount": "还没有账户？",
     "terms": "使用条款",
     "privacy": "隐私政策",
-    "agreement": "登录即表示您同意我们的"
+    "agreement": "登录即表示您同意我们的",
+    "and": "和"
   },
   "signUp": {
-    "title": "注册 Trancy",
+    "title": "注册 SubSentio",
     "usernameLabel": "用户名",
     "usernamePlaceholder": "请输入您的用户名",
     "emailLabel": "邮箱",
@@ -204,5 +205,37 @@
     "invalidCodeOrExpired": "验证码无效或已过期",
     "passwordResetSuccess": "密码已成功重置",
     "passwordResetError": "重置密码时出现错误"
-  }
+  },
+  "emailVerification": {
+    "notifications": {
+      "verifyEmail": "请验证您的电子邮箱。",
+      "loading": "验证中..."
+    },
+    "codeLabel": "验证码",
+    "codePlaceholder": "请输入发送到您邮箱的验证码",
+    "verifyButton": "验证"
+  },
+  "change": {
+    "currentPassword": "请输入当前密码"
+  },
+  "paymentModal": {
+    "title": "订阅设置",
+    "subtitle": "释放您的全部潜能，让世界见证您的成功",
+    "priceDescription": "仅需",
+    "planFeatures": "包含无限双语字幕、翻译、字幕保存及单词训练等所有基础套餐功能。",
+    "dataConsent": {
+      "label": "我确认已阅读",
+      "link": "公开报价",
+      "consent": "并接受其条款，且同意处理我的个人数据。"
+    },
+    "autoPayment": {
+      "label": "同意自动付款"
+    },
+    "errorMessage": "发生了一些错误 😔。请稍后再试。",
+    "buttons": {
+      "cancel": "取消",
+      "confirm": "完成购买"
+    }
+  },
+  "date_end": "订阅结束日期"
 }

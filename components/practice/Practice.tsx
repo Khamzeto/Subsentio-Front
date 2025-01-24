@@ -1,7 +1,6 @@
 'use client';
-
 import React, { useState, useEffect } from 'react';
-import { Button, Progress, Card } from '@nextui-org/react';
+import { Button, Progress, Card, Spinner } from '@nextui-org/react';
 import Flashcard from '@/components/flashcard/Flashcard';
 import DailyGoalSelector from '@/components/DailyGoalSelector/DailyGoalSelector';
 import { IconBook, IconCheck, IconRepeat } from '@tabler/icons-react';
@@ -22,92 +21,52 @@ export default function Practice({ initialLang }: { initialLang: string }) {
   const { t, i18n } = useTranslation();
   const { profile, fetchProfile } = useProfileStore();
 
-  // Список «непройденных» слов
+  // --- Состояния ---
   const [wordsToPractice, setWordsToPractice] = useState<Word[]>([]);
-
-  // История просмотренных слов
   const [history, setHistory] = useState<Word[]>([]);
-
-  // Индекс текущего слова в history
   const [currentIndex, setCurrentIndex] = useState<number>(0);
-
-  // Сколько слов уже выучено (для прогресс-бара)
   const [dailyLearnedWords, setDailyLearnedWords] = useState<number>(0);
-
-  // Анимация смахивания (left/right)
   const [moveDirection, setMoveDirection] = useState<'left' | 'right' | null>(null);
-
-  // Достигли ли цели?
   const [isGoalReached, setIsGoalReached] = useState<boolean | null>(null);
-
-  // Флаг загрузки (при запросах)
-  const [loading, setLoading] = useState<boolean>(false);
-
-  // Цель пользователя (сколько слов нужно выучить)
+  const [loading, setLoading] = useState<boolean>(true);
   const [dayWords, setDayWords] = useState<number>(0);
 
-  // Процент выполнения цели
+  // Вычисляем прогресс
   const progressPercentage = dayWords > 0 ? (dailyLearnedWords / dayWords) * 100 : 0;
-
-  // Пусто ли всё (и history, и wordsToPractice)
   const isListEmpty = wordsToPractice.length === 0;
 
-  // --- Загрузка данных при монтировании ---
+  // ----------------- При первом рендере -----------------
   useEffect(() => {
-    fetchProfile(); // Получаем профиль (там dayWords)
-    fetchDailyStats(); // Сколько уже выучено сегодня
-    fetchUnmasteredWords(); // Слова, которые ещё не выучены
-    checkDailyGoal(); // Проверяем, достигнута ли цель
+    (async () => {
+      setLoading(true);
+      try {
+        await fetchProfile(); // Загрузить профиль (dayWords)
+        await fetchDailyStats(); // Загрузить статистику за день (learnedWords, history)
+        await fetchUnmasteredWords();
+        await checkDailyGoal(); // Проверить, достигнута ли цель
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, [fetchProfile]);
+
+  // При смене языка (SSR / SSG, если нужно)
   useEffect(() => {
     if (i18n.language !== initialLang) {
-      i18n.changeLanguage(initialLang); // Установка языка до рендера
+      i18n.changeLanguage(initialLang);
     }
   }, [initialLang, i18n]);
 
-  /**
-   * Если в профиле (Zustand) поменялся dayWords (пользователь установил новую цель),
-   * автоматически подгружаем слова и статистику заново, чтобы не ждать перезагрузки страницы.
-   */
-  useEffect(() => {
-    if (profile && profile.dayWords) {
-      // Допустим, при каждой смене dayWords подгружаем заново
-      fetchUnmasteredWords();
-      fetchDailyStats();
-      console.log(profile, 'профиль');
-      setDayWords(profile.dayWords);
-    }
-  }, [profile?.dayWords]);
-
+  // Если профиль обновился
   useEffect(() => {
     if (profile?.dayWords) {
       setDayWords(profile.dayWords);
-
-      // Устанавливаем локальное значение, если оно есть в профиле
     }
   }, [profile]);
-  // Проверить, достигнута ли дневная цель
-  const checkDailyGoal = async () => {
-    try {
-      setLoading(true);
-      const response = await $api.get('/word-stats/check-daily-goal');
-      setIsGoalReached(response.data.isGoalReached);
-    } catch (error: any) {
-      console.error(
-        'Не удалось проверить достижение цели:',
-        error.response?.data?.message
-      );
-      setIsGoalReached(null);
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  /**
-   * Загружаем статистику за сегодня:
-   *  - learnedWords (число выученных слов)
-   *  - wordSequence (история уже просмотренных слов)
-   */
+  // ----------------- Запросы -----------------
   const fetchDailyStats = async () => {
     try {
       const response = await $api.get('/word-stats/daily');
@@ -126,29 +85,31 @@ export default function Practice({ initialLang }: { initialLang: string }) {
     }
   };
 
-  /**
-   * Загружаем слова, которые ещё не выучены (unmastered).
-   * Объединяем их со старыми (чтобы не терять).
-   */
   const fetchUnmasteredWords = async () => {
-    setLoading(true);
     try {
       const response = await $api.get('/words?filter=unmastered');
       const newWords = response.data.words ?? [];
       setWordsToPractice(prev => [...prev, ...newWords]);
     } catch (error: any) {
       console.error('Не удалось загрузить слова:', error.response?.data?.message);
-    } finally {
-      setLoading(false);
     }
   };
 
-  /**
-   * Возвращаем текущее слово:
-   * - Если currentIndex < history.length, значит показываем history[currentIndex]
-   * - Иначе, если currentIndex == history.length, показываем wordsToPractice[0]
-   * - Иначе null (всё пройдено)
-   */
+  const checkDailyGoal = async () => {
+    try {
+      const response = await $api.get('/word-stats/check-daily-goal');
+      setIsGoalReached(response.data.isGoalReached);
+    } catch (error: any) {
+      console.error(
+        'Не удалось проверить достижение цели:',
+        error.response?.data?.message
+      );
+      setIsGoalReached(null);
+    }
+  };
+
+  // ----------------- Локальная логика -----------------
+  /** Текущее слово: либо из history (пока не дошли до конца), либо из wordsToPractice[0] */
   const getCurrentWord = (): Word | null => {
     if (currentIndex < history.length) {
       return history[currentIndex];
@@ -159,15 +120,10 @@ export default function Practice({ initialLang }: { initialLang: string }) {
     return null;
   };
 
-  /**
-   * useEffect, который следит за "новым словом" (из wordsToPractice).
-   * Если текущий index == history.length (значит мы «впервые» видим слово из wordsToPractice[0]),
-   * добавим это слово в history, чтобы кнопка «Repeat» потом работала без перезагрузки.
-   */
+  /** Когда появляется новое слово в wordsToPractice, добавим его в history (чтобы была кнопка Repeat) */
   useEffect(() => {
     const currentWord = getCurrentWord();
     if (currentWord && currentIndex === history.length) {
-      // Проверяем, нет ли уже этого слова в history
       const alreadyInHistory = history.some(w => w._id === currentWord._id);
       if (!alreadyInHistory) {
         setHistory(prev => [...prev, currentWord]);
@@ -175,9 +131,7 @@ export default function Practice({ initialLang }: { initialLang: string }) {
     }
   }, [currentIndex, history, wordsToPractice]);
 
-  /**
-   * Кнопка «Повторить» (шаг назад)
-   */
+  /** Повторить (шаг назад) */
   const handleRepeat = () => {
     if (currentIndex > 0) {
       setMoveDirection(null);
@@ -185,94 +139,118 @@ export default function Practice({ initialLang }: { initialLang: string }) {
     }
   };
 
-  /**
-   * Обработка нажатия "Знаю" / "Ещё изучаю"
-   * - Если known, делаем patch(learned=true) и put(.../update)
-   * - Инкрементируем dailyLearnedWords и проверяем, превысили ли цель
-   * - Удаляем слово из wordsToPractice, если оно там
-   * - Сдвигаем currentIndex, если слово было в history
-   * - Или удаляем 0-й элемент из wordsToPractice (если оно было оттуда)
-   */
+  /** Обработка нажатия «Знаю» / «Ещё изучаю» */
   const handleMark = async (known: boolean) => {
     const currentWord = getCurrentWord();
     if (!currentWord) return;
 
     setMoveDirection(known ? 'right' : 'left');
 
-    setTimeout(async () => {
-      try {
-        if (known) {
-          // Если "Знаю"
-          await $api.patch(`/words/${currentWord._id}/learned`, { learned: true });
+    try {
+      if (known) {
+        // Помечаем слово как изученное
+        await $api.patch(`/words/${currentWord._id}/learned`, { learned: true });
 
-          try {
-            await $api.put('/word-stats/update', { wordId: currentWord._id });
-            setDailyLearnedWords(prevCount => {
-              const newCount = prevCount + 1;
-              if (dayWords > 0 && newCount >= dayWords) {
-                setIsGoalReached(true);
-              }
-              return newCount;
-            });
-          } catch (statsError: any) {
-            if (statsError.response?.status === 400) {
-              console.warn('Слово уже учтено.');
+        // Счётчик выученных слов + проверка целей
+        try {
+          await $api.put('/word-stats/update', { wordId: currentWord._id });
+          setDailyLearnedWords(prevCount => {
+            const newCount = prevCount + 1;
+            // Если вдруг превысили цель
+            if (dayWords > 0 && newCount >= dayWords) {
+              setIsGoalReached(true);
             }
+            return newCount;
+          });
+        } catch (statsError: any) {
+          if (statsError.response?.status === 400) {
+            console.warn('Слово уже учтено.');
           }
-
-          if (currentIndex < history.length) {
-            setCurrentIndex(prev => prev + 1);
-            setWordsToPractice(prev => prev.filter(w => w._id !== currentWord._id));
-          } else {
-            setWordsToPractice(prev =>
-              prev.slice(1).filter(w => w._id !== currentWord._id)
-            );
-          }
-
-          setHistory(prevHistory => {
-            const alreadyInHistory = prevHistory.some(w => w._id === currentWord._id);
-            return alreadyInHistory ? prevHistory : [...prevHistory, currentWord];
-          });
-        } else {
-          // Если "Ещё изучаю"
-          await $api.patch(`/words/${currentWord._id}/learning`, { learning: true });
-
-          setCurrentIndex(prev => prev + 1);
-
-          // Обновляем массив и индекс последовательно
-          setWordsToPractice(prevWords => {
-            const nextWords = [...prevWords.slice(1), currentWord];
-            setCurrentIndex(history.length); // Индекс обновляем после изменения массива
-            return nextWords;
-          });
-          setCurrentIndex(prev => prev + 1);
-
-          setHistory(prevHistory => {
-            const alreadyInHistory = prevHistory.some(w => w._id === currentWord._id);
-            return alreadyInHistory ? prevHistory : [...prevHistory, currentWord];
-          });
         }
-      } catch (error: any) {
-        console.error('Ошибка при handleMark:', error.response?.data?.message);
-      } finally {
-        setMoveDirection(null);
+
+        // Переходим к следующему слову
+        if (currentIndex < history.length) {
+          setCurrentIndex(prev => prev + 1);
+          // Убираем текущее слово из очереди
+          setWordsToPractice(prev => prev.filter(w => w._id !== currentWord._id));
+        } else {
+          setWordsToPractice(prev =>
+            prev.slice(1).filter(w => w._id !== currentWord._id)
+          );
+        }
+
+        setHistory(prevHistory => {
+          const alreadyInHistory = prevHistory.some(w => w._id === currentWord._id);
+          return alreadyInHistory ? prevHistory : [...prevHistory, currentWord];
+        });
+      } else {
+        // Помечаем как "ещё изучается"
+        await $api.patch(`/words/${currentWord._id}/learning`, { learning: true });
+
+        // Ставим слово в конец очереди
+        setCurrentIndex(prev => prev + 1);
+        setWordsToPractice(prevWords => {
+          const nextWords = [...prevWords.slice(1), currentWord];
+          // Индекс обновим после изменения массива
+          setCurrentIndex(history.length);
+          return nextWords;
+        });
+        setCurrentIndex(prev => prev + 1);
+
+        // Добавляем в history (если ещё нет)
+        setHistory(prevHistory => {
+          const alreadyInHistory = prevHistory.some(w => w._id === currentWord._id);
+          return alreadyInHistory ? prevHistory : [...prevHistory, currentWord];
+        });
       }
-    }, 300);
+    } catch (error: any) {
+      console.error('Ошибка при handleMark:', error.response?.data?.message);
+    } finally {
+      setMoveDirection(null);
+    }
   };
 
-  // Получаем текущее слово
+  // ----------------- «Оптимистичная» смена цели -----------------
+  /**
+   * Когда из DailyGoalSelector приходит новый goal,
+   * мы сразу (не дожидаясь ответа сервера) ставим dayWords.
+   * Если уже выучили больше, чем новая цель — мгновенно показываем успех.
+   */
+  const handleSetGoal = (newGoal: number) => {
+    // 1. Ставим новую цель в локальный стейт
+    setDayWords(newGoal);
+
+    // 2. Оптимистично определяем, достигнута ли цель прямо сейчас
+    if (dailyLearnedWords >= newGoal) {
+      setIsGoalReached(true);
+    } else {
+      setIsGoalReached(false);
+    }
+  };
+
+  // ----------------- Рендер -----------------
+  // Если идёт загрузка данных — показываем спиннер на весь экран
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center w-full h-[calc(100vh-80px)]">
+        <Spinner />
+      </div>
+    );
+  }
+
   const currentWord = getCurrentWord();
 
   return (
     <div className="flex flex-col h-full w-full dark:bg-[#121212] overflow-hidden p-6 mx-auto">
       {/* Шапка: заголовок и выбор дневной цели */}
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex  flex-col lg:flex-row flex-start lg:justify-between  items-start gap-[20px] mb-8">
         <h1 className="text-3xl font-bold">{t('practice.title')}</h1>
+
         <DailyGoalSelector
-          onSetGoal={(goal: number) => {
-            // Можно что-то делать сразу, но мы используем useEffect для подгрузки
-          }}
+          onSetGoal={handleSetGoal}
           fetchUnmasteredWords={async () => {
+            // Эти вызовы идут «за кадром»,
+            // если хотите пересвечивать UI загрузкой — добавьте setLoading(true)
             await fetchProfile();
             await fetchUnmasteredWords();
             await fetchDailyStats();
@@ -319,7 +297,7 @@ export default function Practice({ initialLang }: { initialLang: string }) {
         </div>
       ) : (
         <>
-          {/* Если нет слов вообще и мы не грузимся */}
+          {/* Если нет слов вообще и при этом dailyLearnedWords = 0 */}
           {!loading && isListEmpty && dailyLearnedWords <= 0 && (
             <div className="flex flex-col items-center justify-center h-full w-full ">
               <Card
@@ -347,22 +325,16 @@ export default function Practice({ initialLang }: { initialLang: string }) {
 
           {/* Если есть текущее слово */}
           {dayWords > 0 && currentWord && (
-            <div className="flex flex-col items-center h-full w-full overflow-hidden  mx-auto ">
+            <div className="flex flex-col items-center h-full w-full overflow-hidden mx-auto">
               <div
                 className={`
                   flex flex-col w-full items-center
-                  transition-transform duration-300 ease-in-out
-                  ${
-                    moveDirection === 'right'
-                      ? 'translate-x-40'
-                      : moveDirection === 'left'
-                      ? '-translate-x-40'
-                      : ''
-                  }
+                  transition-transform duration-200 ease-in-out
+                  ${moveDirection === 'left' ? 'translate-x-[-10px]' : ''} 
+                  ${moveDirection === 'right' ? 'translate-x-[10px]' : ''}
                 `}
               >
                 <Flashcard
-                  // @ts-ignore
                   word={currentWord}
                   onMark={handleMark}
                   currentIndex={currentIndex}
@@ -404,7 +376,7 @@ export default function Practice({ initialLang }: { initialLang: string }) {
             </div>
           )}
 
-          {/* Если все карточки закончились, но есть выученные слова */}
+          {/* Если все карточки закончились, но есть выученные слова (dailyLearnedWords > 0) */}
           {!loading && isListEmpty && dailyLearnedWords > 0 && (
             <div className="flex flex-col items-center justify-center h-full w-full">
               <Card

@@ -1,6 +1,6 @@
 {
   "signIn": {
-    "title": "Connectez-vous à Trancy",
+    "title": "Connectez-vous à SubSentio",
     "emailLabel": "E-mail",
     "emailPlaceholder": "Entrez votre e-mail",
     "passwordLabel": "Mot de passe",
@@ -10,10 +10,11 @@
     "noAccount": "Vous n’avez pas de compte ?",
     "terms": "Conditions d’utilisation",
     "privacy": "Politique de confidentialité",
-    "agreement": "En vous connectant, vous acceptez nos"
+    "agreement": "En vous connectant, vous acceptez nos",
+    "and": "et"
   },
   "signUp": {
-    "title": "Inscrivez-vous sur Trancy",
+    "title": "Inscrivez-vous sur SubSentio",
     "usernameLabel": "Nom d’utilisateur",
     "usernamePlaceholder": "Entrez votre nom d’utilisateur",
     "emailLabel": "E-mail",
@@ -204,5 +205,37 @@
     "invalidCodeOrExpired": "Code invalide ou expiré",
     "passwordResetSuccess": "Mot de passe réinitialisé avec succès",
     "passwordResetError": "Erreur lors de la réinitialisation du mot de passe"
-  }
+  },
+  "emailVerification": {
+    "notifications": {
+      "verifyEmail": "Veuillez vérifier votre adresse e-mail.",
+      "loading": "Vérification en cours..."
+    },
+    "codeLabel": "Code de vérification",
+    "codePlaceholder": "Entrez le code envoyé à votre adresse e-mail",
+    "verifyButton": "Vérifier"
+  },
+  "change": {
+    "currentPassword": "Entrez votre mot de passe actuel"
+  },
+  "paymentModal": {
+    "title": "Paramétrage de l'abonnement",
+    "subtitle": "Dévoilez tout votre potentiel et laissez le monde voir votre succès",
+    "priceDescription": "Pour seulement",
+    "planFeatures": "Toutes les fonctionnalités du plan de base, y compris les sous-titres double illimités, la traduction, l'enregistrement des sous-titres et l'entraînement de vocabulaire.",
+    "dataConsent": {
+      "label": "Je confirme avoir lu l'",
+      "link": "offre publique",
+      "consent": "j'en accepte les conditions et j'autorise le traitement de mes données personnelles."
+    },
+    "autoPayment": {
+      "label": "J'accepte le paiement automatique"
+    },
+    "errorMessage": "Quelque chose s'est mal passé 😔. Veuillez réessayer plus tard.",
+    "buttons": {
+      "cancel": "Annuler",
+      "confirm": "Finaliser l'achat"
+    }
+  },
+  "date_end": "Date de fin d'abonnement"
 }

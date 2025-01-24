@@ -1,6 +1,6 @@
 {
   "signIn": {
-    "title": "Entrar no Trancy",
+    "title": "Entrar no SubSentio",
     "emailLabel": "E-mail",
     "emailPlaceholder": "Digite seu e-mail",
     "passwordLabel": "Senha",
@@ -10,10 +10,11 @@
     "noAccount": "Não tem uma conta?",
     "terms": "Termos de uso",
     "privacy": "Política de privacidade",
-    "agreement": "Ao entrar, você concorda com nossos"
+    "agreement": "Ao entrar, você concorda com nossos",
+    "and": "e"
   },
   "signUp": {
-    "title": "Registre-se no Trancy",
+    "title": "Registre-se no SubSentio",
     "usernameLabel": "Nome de usuário",
     "usernamePlaceholder": "Digite seu nome de usuário",
     "emailLabel": "E-mail",
@@ -204,5 +205,37 @@
     "invalidCodeOrExpired": "Código inválido ou expirado",
     "passwordResetSuccess": "Senha redefinida com sucesso",
     "passwordResetError": "Erro ao redefinir a senha"
-  }
+  },
+  "emailVerification": {
+    "notifications": {
+      "verifyEmail": "Por favor, verifique seu e-mail.",
+      "loading": "Verificando..."
+    },
+    "codeLabel": "Código de verificação",
+    "codePlaceholder": "Insira o código enviado para seu e-mail",
+    "verifyButton": "Verificar"
+  },
+  "change": {
+    "currentPassword": "Insira sua senha atual"
+  },
+  "paymentModal": {
+    "title": "Configuração de Assinatura",
+    "subtitle": "Liberte todo o seu potencial e deixe o mundo ver o seu sucesso",
+    "priceDescription": "Apenas por",
+    "planFeatures": "Todos os recursos do plano Básico, incluindo legendas duplas ilimitadas, tradução, salvamento de legendas e treinamento de palavras.",
+    "dataConsent": {
+      "label": "Confirmo que li a",
+      "link": "oferta pública",
+      "consent": "aceito seus termos e dou meu consentimento para o processamento dos meus dados pessoais."
+    },
+    "autoPayment": {
+      "label": "Concordo com o pagamento automático"
+    },
+    "errorMessage": "Algo deu errado 😔. Tente novamente mais tarde.",
+    "buttons": {
+      "cancel": "Cancelar",
+      "confirm": "Concluir compra"
+    }
+  },
+  "date_end": "Data de término da assinatura"
 }

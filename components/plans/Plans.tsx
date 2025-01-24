@@ -4,8 +4,10 @@ import { Card, Button } from '@nextui-org/react';
 import { IconCheck } from '@tabler/icons-react';
 import PaymentModal from '@/components/paymentModal/PaymentModal';
 import { useTranslation } from 'react-i18next';
+import useProfileStore from '../store/useProfileStore';
 
 export default function PricingCards({ initialLang }: { initialLang: string }) {
+  const { profile } = useProfileStore();
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState(null);
   const { t, i18n } = useTranslation();
@@ -16,8 +18,14 @@ export default function PricingCards({ initialLang }: { initialLang: string }) {
     }
   }, [initialLang, i18n]);
 
+  // Определяем, нужно ли отображать цены в долларах
+  const isUsingDollars = initialLang != 'ru';
+  const exchangeRate = 100; // 1 USD = 100 RUB
+
+  // Определяем планы
   const plans = [
     {
+      id: 'basic',
       title: t('plans.basic'),
       price: t('plans.free'),
       features: [
@@ -29,12 +37,15 @@ export default function PricingCards({ initialLang }: { initialLang: string }) {
       ],
       highlight: false,
       color: 'gray',
-      buttonText: t('plans.activated'),
+      buttonText: profile?.plan === 'basic' ? t('plans.activated') : t('plans.free'),
       buttonDisabled: true,
     },
     {
+      id: 'premium',
       title: t('plans.premiumMonth'),
-      price: `199₽ / ${t('plans.month')}`,
+      price: isUsingDollars
+        ? `$${(199 / exchangeRate).toFixed(2)} / ${t('plans.month')}`
+        : `199₽ / ${t('plans.month')}`,
       features: [
         t('plans.allBasicFeatures'),
         t('plans.unlimitedDualSubtitles'),
@@ -44,11 +55,16 @@ export default function PricingCards({ initialLang }: { initialLang: string }) {
       ],
       highlight: true,
       color: 'softBlue',
-      buttonText: t('plans.upgradeToPremium'),
+      buttonText:
+        profile?.plan === 'premium' ? t('plans.activated') : t('plans.upgradeToPremium'),
+      buttonDisabled: profile?.plan === 'premium',
     },
     {
+      id: 'enterprise',
       title: t('plans.premiumYear'),
-      price: `1299₽ / ${t('plans.year')}`,
+      price: isUsingDollars
+        ? `$${(1299 / exchangeRate).toFixed(2)} / ${t('plans.year')}`
+        : `1299₽ / ${t('plans.year')}`,
       features: [
         t('plans.allBasicFeatures'),
         t('plans.unlimitedDualSubtitles'),
@@ -58,13 +74,19 @@ export default function PricingCards({ initialLang }: { initialLang: string }) {
       ],
       highlight: true,
       color: 'softGold',
-      buttonText: t('plans.upgradeToPremium'),
+      buttonText:
+        profile?.plan === 'enterprise'
+          ? t('plans.activated')
+          : t('plans.upgradeToPremium'),
+      buttonDisabled: profile?.plan === 'enterprise',
     },
   ];
 
   const handlePlanSelect = plan => {
-    setSelectedPlan(plan);
-    setModalOpen(true);
+    if (!plan.buttonDisabled) {
+      setSelectedPlan(plan);
+      setModalOpen(true);
+    }
   };
 
   const handleConfirmPayment = async () => {
@@ -123,7 +145,7 @@ export default function PricingCards({ initialLang }: { initialLang: string }) {
                 {plan.features.map((feature, i) => (
                   <li
                     key={i}
-                    className="flex  items-start justify-start text-left gap-[10px]"
+                    className="flex items-start justify-start text-left gap-[10px]"
                   >
                     <IconCheck
                       size={20}
@@ -170,6 +192,8 @@ export default function PricingCards({ initialLang }: { initialLang: string }) {
           open={modalOpen}
           onClose={() => setModalOpen(false)}
           selectedPlan={selectedPlan}
+          initialLang={initialLang}
+          // @ts-ignore
           onConfirm={handleConfirmPayment}
         />
       )}

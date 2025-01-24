@@ -41,6 +41,8 @@ type SubtitleDetailsProps = {
   setWords: React.Dispatch<React.SetStateAction<Word[]>>;
   setSelectedWord: React.Dispatch<React.SetStateAction<Word | null>>;
   initialLang: string;
+  profile: string;
+  t: string;
 };
 
 const SubtitleDetails: React.FC<SubtitleDetailsProps> = ({
@@ -54,8 +56,9 @@ const SubtitleDetails: React.FC<SubtitleDetailsProps> = ({
   setWords,
   setSelectedWord,
   initialLang,
+  profile,
+  t,
 }) => {
-  const { t, i18n } = useTranslation(); // Подключаемся к неймспейсу common
   const [translationData, setTranslationData] = useState<any>(null);
   const [examplesData, setExamplesData] = useState<any>(null);
   const [synonymsData, setSynonymsData] = useState<any>(null);
@@ -63,23 +66,27 @@ const SubtitleDetails: React.FC<SubtitleDetailsProps> = ({
   const [isPlaying, setIsPlaying] = useState(false);
 
   // Если язык из пропсов не совпадает с i18n.language, переключаем.
-  if (initialLang !== i18n.language) {
-    i18n.changeLanguage(initialLang);
-  }
 
   const handleAudioPlay = () => {
-    const voiceMap: Record<string, string> = {
-      ru: 'Alyona22k',
-      es: 'Maria22k',
-      de: 'Klaus22k',
-      fr: 'Bruno22k',
-      tr: 'Ipek22k',
-      ar: 'Mehdi22k',
-      en: 'Heather22k',
+    const voiceMap = {
+      ru: 'Alyona22k', // Русский
+      es: 'Maria22k', // Испанский
+      de: 'Klaus22k', // Немецкий
+      fr: 'Bruno22k', // Французский
+      tr: 'Ipek22k', // Турецкий
+      ar: 'Mehdi22k', // Арабский
+      en: 'Heather22k', // Английский по умолчанию
     };
 
-    const voiceName = voiceMap[targetLang] || 'Heather22k';
-    const encodedWord = btoa(word);
+    // Определяем голос, соответствующий языку, или используем английский по умолчанию
+    const voiceName = voiceMap[wordFull?.sourceLanguage] || 'Heather22k';
+
+    // Кодируем текст в Base64 с учетом UTF-8
+    const encodeToBase64 = str => {
+      return btoa(unescape(encodeURIComponent(str)));
+    };
+
+    const encodedWord = encodeToBase64(word);
 
     const audio = new Audio(
       `https://voice.reverso.net/RestPronunciation.svc/v1/output=json/GetVoiceStream/voiceName=${voiceName}?voiceSpeed=80&inputText=${encodeURIComponent(
@@ -92,42 +99,120 @@ const SubtitleDetails: React.FC<SubtitleDetailsProps> = ({
     audio.play();
 
     audio.addEventListener('ended', () => {
-      setIsPlaying(false);
+      setIsPlaying(false); // Сбрасываем состояние после завершения воспроизведения
     });
 
     audio.addEventListener('error', () => {
-      setIsPlaying(false);
-      console.error(t('subtitleDetails.audioError'));
+      setIsPlaying(false); // Сбрасываем состояние при ошибке воспроизведения
+      console.error('Ошибка воспроизведения аудио');
     });
   };
 
   // Загружаем перевод
   useEffect(() => {
     if (!word || !sourceLang || !targetLang) return;
-
-    const fetchTranslation = async (word: string, srcLang: string, trgLang: string) => {
+    console.log(wordFull, 'слово');
+    const fetchTranslation = async (theWord, src, tgt) => {
       try {
-        const response = await fetch('http://127.0.0.1:5001/translate/single', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            word,
-            source_lang: trgLang,
-            target_lang: srcLang,
-          }),
+        const apiUrl = `https://translate.googleapis.com/translate_a/single?dt=t&dt=bd&dt=qc&dt=rm&dt=ex&client=gtx&sl=${
+          wordFull?.sourceLanguage
+        }&tl=${wordFull?.targetLanguage}&q=${encodeURIComponent(
+          theWord
+        )}&dj=1&tk=767422.767422`;
+
+        const response = await fetch(apiUrl, {
+          method: 'GET',
+          headers: {
+            'Accept-Language': 'en', // Запрашиваем ответ на английском
+          },
         });
 
-        if (!response.ok) throw new Error('Network response was not ok');
-        const data = await response.json();
-
-        if (data.translation?.error) {
-          throw new Error(data.translation.error);
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
         }
 
-        setTranslationData(data.translation);
-      } catch (error: any) {
+        const data = await response.json();
+        if (!data.sentences && !data.dict) {
+          throw new Error('No translation data found');
+        }
+
+        // Массив переводов
+        let translationsArray = [];
+        // Массив транскрипций (IPA)
+        let ipa_pronunciations = [];
+
+        // 1) Если есть словарь (dict), собираем оттуда переводы
+        if (Array.isArray(data.dict) && data.dict.length > 0) {
+          data.dict.forEach(dictItem => {
+            if (Array.isArray(dictItem.entry)) {
+              dictItem.entry.forEach(entry => {
+                translationsArray.push({
+                  russian: entry.word,
+                  english:
+                    Array.isArray(entry.reverse_translation) &&
+                    entry.reverse_translation.length > 0
+                      ? entry.reverse_translation[0]
+                      : theWord,
+                  // Преобразуем pos (adjective → Adjective, noun → Noun, ...)
+                  gender: dictItem.pos
+                    ? dictItem.pos.charAt(0).toUpperCase() + dictItem.pos.slice(1)
+                    : '',
+                });
+              });
+            }
+          });
+        }
+
+        // 2) Если словарь пуст, используем sentences
+        if (translationsArray.length === 0 && Array.isArray(data.sentences)) {
+          const firstSentence = data.sentences[0] || {};
+          translationsArray.push({
+            russian: firstSentence.trans || '',
+            english: firstSentence.orig || theWord,
+            gender: '',
+          });
+        }
+
+        // 3) Ограничиваем максимум до 6 переводов
+        translationsArray = translationsArray.slice(0, 6);
+
+        // 4) Забираем транскрипцию из data.sentences[1].src_translit, если есть
+        if (data.sentences && data.sentences[1] && data.sentences[1].src_translit) {
+          ipa_pronunciations.push(data.sentences[1].src_translit);
+        }
+
+        // Формируем итоговый объект
+        const finalResult = {
+          word: theWord,
+
+          translations: translationsArray,
+          ipa_pronunciations,
+        };
+
+        // Устанавливаем данные в State или возвращаем
+        setTranslationData(finalResult);
+      } catch (error) {
         console.error('Error fetching translation:', error.message);
-        setTranslationData({ error: t('subtitleDetails.noTranslationsAvailable') });
+
+        // При ошибке возвращаем предсказуемую структуру
+        const errorResult = {
+          word: theWord,
+          translation: {
+            word: theWord,
+            translations: [
+              {
+                russian: 'Ошибка перевода',
+                english: 'Translation error',
+                gender: '',
+              },
+            ],
+            ipa_pronunciations: [],
+          },
+          error: true,
+          message: 'Translation not found',
+        };
+
+        setTranslationData(errorResult);
       }
     };
 
@@ -157,10 +242,10 @@ const SubtitleDetails: React.FC<SubtitleDetailsProps> = ({
 
     const fetchSynonyms = async () => {
       try {
-        const response = await fetch('http://127.0.0.1:5001/synonyms', {
+        const response = await fetch('https://translate.subsentio.online/synonyms', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ word, source_lang: sourceLang }),
+          body: JSON.stringify({ word, source_lang: wordFull?.targetLanguage }),
         });
 
         if (!response.ok) throw new Error('Network response was not ok');
@@ -181,15 +266,18 @@ const SubtitleDetails: React.FC<SubtitleDetailsProps> = ({
 
     const fetchExamples = async () => {
       try {
-        const response = await fetch('http://127.0.0.1:5001/translate/examples', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            word,
-            source_lang: targetLang,
-            target_lang: sourceLang,
-          }),
-        });
+        const response = await fetch(
+          'https://translate.subsentio.online/translate/examples',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              word,
+              source_lang: wordFull?.targetLanguage,
+              target_lang: wordFull?.sourceLanguage,
+            }),
+          }
+        );
 
         if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
@@ -282,56 +370,58 @@ const SubtitleDetails: React.FC<SubtitleDetailsProps> = ({
           <div>
             <h1 className="global-header_title">{t('subtitleDetails.title')}</h1>
           </div>
-          <div className="premium-banner">
-            <a className="btn-premium">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="27"
-                height="27"
-                viewBox="0 0 27 27"
-                fill="none"
-              >
-                <path
-                  fillRule="evenodd"
-                  clipRule="evenodd"
-                  d="M17.0097 5.14307L20.1932 9.38778L11.7038 19.9996L3.21436 9.38778L6.40744 5.14307H17.0097Z"
-                  stroke="white"
-                  strokeWidth="1.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M3.21436 9.38818H20.1932"
-                  stroke="white"
-                  strokeWidth="1.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M8.52002 9.38818L11.7036 20"
-                  stroke="white"
-                  strokeWidth="1.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M14.8874 9.38818L11.7039 20"
-                  stroke="white"
-                  strokeWidth="1.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M6.40771 5.14307L8.52052 9.38778L11.7041 5.14307L14.8876 9.38778L17.01 5.14307"
-                  stroke="white"
-                  strokeWidth="1.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              <span>{t('subtitleDetails.upgradePremium')}</span>
-            </a>
-          </div>
+          {profile?.plan === 'free' && (
+            <div className="premium-banner">
+              <a className="btn-premium">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="27"
+                  height="27"
+                  viewBox="0 0 27 27"
+                  fill="none"
+                >
+                  <path
+                    fillRule="evenodd"
+                    clipRule="evenodd"
+                    d="M17.0097 5.14307L20.1932 9.38778L11.7038 19.9996L3.21436 9.38778L6.40744 5.14307H17.0097Z"
+                    stroke="white"
+                    strokeWidth="1.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M3.21436 9.38818H20.1932"
+                    stroke="white"
+                    strokeWidth="1.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M8.52002 9.38818L11.7036 20"
+                    stroke="white"
+                    strokeWidth="1.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M14.8874 9.38818L11.7039 20"
+                    stroke="white"
+                    strokeWidth="1.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M6.40771 5.14307L8.52052 9.38778L11.7041 5.14307L14.8876 9.38778L17.01 5.14307"
+                    stroke="white"
+                    strokeWidth="1.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <span>{t('subtitleDetails.upgradePremium')}</span>
+              </a>
+            </div>
+          )}
         </div>
       </div>
 

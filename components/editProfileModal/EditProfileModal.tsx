@@ -23,9 +23,9 @@ const languageMap: Record<string, string> = {
   es: 'Español',
   fr: 'Français',
   de: 'Deutsch',
-  zh: '中文',
   it: 'Italiano',
-  jp: '日本語',
+  pt: 'Português',
+  ar: 'العربية', // Арабский язык
 };
 
 const EditProfileModal = ({

@@ -1,7 +1,9 @@
 {
   "signIn": {
-    "title": "Sign in to Trancy",
+    "title": "Sign in to SubSentio",
     "emailLabel": "Email",
+    "signin": "Sign In",
+    "signup": "Sign Up",
     "emailPlaceholder": "Enter your email",
     "passwordLabel": "Password",
     "passwordPlaceholder": "Enter your password",
@@ -10,10 +12,11 @@
     "noAccount": "Don't have an account?",
     "terms": "Terms of use",
     "privacy": "Privacy policy",
-    "agreement": "By signing in, you agree to our"
+    "agreement": "By signing in, you agree to our",
+    "and": "and"
   },
   "signUp": {
-    "title": "Sign up for Trancy",
+    "title": "Sign up for SubSentio",
     "usernameLabel": "Username",
     "usernamePlaceholder": "Enter your username",
     "emailLabel": "Email",
@@ -206,5 +209,37 @@
     "invalidCodeOrExpired": "Invalid code or code has expired",
     "passwordResetSuccess": "Password has been reset successfully",
     "passwordResetError": "Error resetting password"
-  }
+  },
+  "emailVerification": {
+    "notifications": {
+      "verifyEmail": "Please verify your email.",
+      "loading": "Verifying..."
+    },
+    "codeLabel": "Verification code",
+    "codePlaceholder": "Enter the code sent to your email",
+    "verifyButton": "Verify"
+  },
+  "change": {
+    "currentPassword": "Enter your current password"
+  },
+  "paymentModal": {
+    "title": "Subscription Setup",
+    "subtitle": "Unleash your full potential and let the world see your success",
+    "priceDescription": "Only for",
+    "planFeatures": "All features of the Basic plan, including unlimited dual subtitles, translation, subtitle saving, and word training.",
+    "dataConsent": {
+      "label": "I confirm that I have read the",
+      "link": "public offer",
+      "consent": "accept its terms, and consent to the processing of my personal data."
+    },
+    "autoPayment": {
+      "label": "Agree to automatic payment"
+    },
+    "errorMessage": "Something went wrong 😔. Please try again later.",
+    "buttons": {
+      "cancel": "Cancel",
+      "confirm": "Complete Purchase"
+    }
+  },
+  "date_end": "Subscription end date"
 }

@@ -3,7 +3,7 @@ import axios from 'axios';
 
 // Базовый URL вашего API
 const $api = axios.create({
-  baseURL: 'http://localhost:5001/api', // Замените на ваш URL
+  baseURL: 'https://api.subsentio.online/api', // Замените на ваш URL
   headers: {
     'Content-Type': 'application/json',
   },
@@ -40,9 +40,12 @@ $api.interceptors.response.use(
         }
 
         // Запрос для обновления токена
-        const { data } = await axios.post('http://localhost:5001/api/users/refresh', {
-          refreshToken,
-        });
+        const { data } = await axios.post(
+          'https://api.subsentio.online/api/users/refresh',
+          {
+            refreshToken,
+          }
+        );
 
         // Обновляем токены в Zustand
         useAuthStore.getState().setTokens(data.accessToken, data.refreshToken);

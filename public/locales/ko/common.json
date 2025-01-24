@@ -1,6 +1,6 @@
 {
   "signIn": {
-    "title": "Trancy에 로그인",
+    "title": "SubSentio에 로그인",
     "emailLabel": "이메일",
     "emailPlaceholder": "이메일을 입력하세요",
     "passwordLabel": "비밀번호",
@@ -10,10 +10,11 @@
     "noAccount": "계정이 없으신가요?",
     "terms": "이용 약관",
     "privacy": "개인정보 처리방침",
-    "agreement": "로그인함으로써 다음에 동의하게 됩니다:"
+    "agreement": "로그인함으로써 다음에 동의하게 됩니다:",
+    "and": "그리고"
   },
   "signUp": {
-    "title": "Trancy에 가입",
+    "title": "SubSentio에 가입",
     "usernameLabel": "사용자명",
     "usernamePlaceholder": "사용자명을 입력하세요",
     "emailLabel": "이메일",
@@ -204,5 +205,37 @@
     "invalidCodeOrExpired": "코드가 유효하지 않거나 만료되었습니다",
     "passwordResetSuccess": "비밀번호를 성공적으로 재설정했습니다",
     "passwordResetError": "비밀번호 재설정 중 오류가 발생했습니다"
-  }
+  },
+  "emailVerification": {
+    "notifications": {
+      "verifyEmail": "이메일을 인증해 주세요.",
+      "loading": "확인 중..."
+    },
+    "codeLabel": "인증 코드",
+    "codePlaceholder": "이메일로 전송된 코드를 입력하세요",
+    "verifyButton": "인증"
+  },
+  "change": {
+    "currentPassword": "현재 비밀번호를 입력하세요"
+  },
+  "paymentModal": {
+    "title": "구독 설정",
+    "subtitle": "잠재력을 최대한 발휘하고, 전 세계에 당신의 성공을 보여주세요",
+    "priceDescription": "단",
+    "planFeatures": "무제한 이중 자막, 번역, 자막 저장, 단어 훈련 등 기본 플랜의 모든 기능을 포함합니다.",
+    "dataConsent": {
+      "label": "다음을 읽었음을 확인합니다",
+      "link": "공개 오퍼",
+      "consent": "해당 조건에 동의하며, 내 개인 정보의 처리에 동의합니다."
+    },
+    "autoPayment": {
+      "label": "자동 결제에 동의합니다"
+    },
+    "errorMessage": "문제가 발생했습니다 😔. 나중에 다시 시도해주세요.",
+    "buttons": {
+      "cancel": "취소",
+      "confirm": "구매 완료"
+    }
+  },
+  "date_end": "구독 종료 날짜"
 }

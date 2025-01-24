@@ -1,6 +1,6 @@
 {
   "signIn": {
-    "title": "Trancyにサインイン",
+    "title": "SubSentioにサインイン",
     "emailLabel": "メールアドレス",
     "emailPlaceholder": "メールアドレスを入力してください",
     "passwordLabel": "パスワード",
@@ -10,10 +10,11 @@
     "noAccount": "アカウントをお持ちではありませんか？",
     "terms": "利用規約",
     "privacy": "プライバシーポリシー",
-    "agreement": "サインインすることで、以下に同意したものとみなされます："
+    "agreement": "サインインすることで、以下に同意したものとみなされます：",
+    "and": "と"
   },
   "signUp": {
-    "title": "Trancyに登録",
+    "title": "SubSentioに登録",
     "usernameLabel": "ユーザー名",
     "usernamePlaceholder": "ユーザー名を入力してください",
     "emailLabel": "メールアドレス",
@@ -204,5 +205,37 @@
     "invalidCodeOrExpired": "コードが無効または期限切れです",
     "passwordResetSuccess": "パスワードを正常にリセットしました",
     "passwordResetError": "パスワードリセット中にエラーが発生しました"
-  }
+  },
+  "emailVerification": {
+    "notifications": {
+      "verifyEmail": "メールアドレスを確認してください。",
+      "loading": "確認中..."
+    },
+    "codeLabel": "確認コード",
+    "codePlaceholder": "メールに送信されたコードを入力してください",
+    "verifyButton": "確認"
+  },
+  "change": {
+    "currentPassword": "現在のパスワードを入力してください"
+  },
+  "paymentModal": {
+    "title": "サブスクリプション設定",
+    "subtitle": "あなたの可能性を解き放ち、世界にあなたの成功を示しましょう",
+    "priceDescription": "わずか",
+    "planFeatures": "ベーシックプランのすべての機能を含み、無制限のデュアル字幕、翻訳、字幕保存、単語トレーニングを利用できます。",
+    "dataConsent": {
+      "label": "私は、以下を読みました",
+      "link": "公開オファー",
+      "consent": "その条件に同意し、個人情報の処理に同意します。"
+    },
+    "autoPayment": {
+      "label": "自動決済に同意します"
+    },
+    "errorMessage": "問題が発生しました 😔。後ほど再度お試しください。",
+    "buttons": {
+      "cancel": "キャンセル",
+      "confirm": "購入を完了"
+    }
+  },
+  "date_end": "サブスクリプション終了日"
 }
