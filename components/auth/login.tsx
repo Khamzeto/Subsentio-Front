@@ -55,7 +55,7 @@ export default function SignIn() {
 
       // Отправляем токены в расширение
       chrome.runtime.sendMessage(
-        'inmhgffbjphoglipdfpjbmjkjdcbgagi', // ID вашего расширения
+        'bahaiebflbbbaliceahjmenhehfaaica', // ID вашего расширения
         { type: 'SAVE_TOKENS', accessToken, refreshToken },
         response => {
           if (response?.success) {
