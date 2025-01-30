@@ -51,20 +51,26 @@ export default function SignIn() {
       const { accessToken, refreshToken, messageKey } = response.data;
       console.log(accessToken);
 
-      setTokens(accessToken, refreshToken); // Сохраняем токены
+      // Сохраняем токены в вашем приложении
+      setTokens(accessToken, refreshToken);
 
-      // Отправляем токены в расширение
-      chrome.runtime.sendMessage(
-        'bahaiebflbbbaliceahjmenhehfaaica', // ID вашего расширения
-        { type: 'SAVE_TOKENS', accessToken, refreshToken },
-        response => {
-          if (response?.success) {
-            console.log(response.message);
-          } else {
-            console.error('Ошибка при передаче токенов в расширение:', response.message);
+      // Отправляем токены в расширение, если оно доступно
+      if (typeof chrome !== 'undefined' && chrome.runtime?.sendMessage) {
+        chrome.runtime.sendMessage(
+          'bahaiebflbbbaliceahjmenhehfaaica', // ID вашего расширения
+          { type: 'SAVE_TOKENS', accessToken, refreshToken },
+          response => {
+            if (response?.success) {
+              console.log(response.message);
+            } else {
+              console.error(
+                'Ошибка при передаче токенов в расширение:',
+                response?.message
+              );
+            }
           }
-        }
-      );
+        );
+      }
 
       // Уведомляем пользователя
       toast.success(t(messageKey), {
