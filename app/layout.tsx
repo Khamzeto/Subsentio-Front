@@ -23,6 +23,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang={params.locale || 'en'}>
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+      />
+
       <body
         className={clsx('font-sans antialiased dark:bg-[#121212]', fontSans.className)}
       >
