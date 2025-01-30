@@ -100,7 +100,7 @@ const EditProfilePage = ({ initialLang }: Props) => {
         avatar: profile.avatar || '😊',
       });
     }
-  }, [profile, formData.username]);
+  }, [profile]);
 
   // Обработчик изменений в текстовых полях (username, etc.)
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
