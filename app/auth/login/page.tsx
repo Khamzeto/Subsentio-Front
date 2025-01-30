@@ -28,7 +28,7 @@ export async function generateMetadata() {
   }
 
   return {
-    title: `${`${translations.signIn.signin} | Subsentio` || 'Profile'}`, // Динамический заголовок с переводом и смайликом
+    title: `${`${translations?.signIn?.signin} | Subsentio` || 'Profile'}`, // Динамический заголовок с переводом и смайликом
   };
 }
 

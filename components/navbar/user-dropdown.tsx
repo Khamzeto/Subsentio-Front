@@ -30,17 +30,6 @@ export const UserDropdown = ({ t }: UserDropdownProps) => {
   }, []);
   const handleLogout = useCallback(async () => {
     // Отправляем сообщение расширению для удаления токенов
-    chrome.runtime.sendMessage(
-      'bahaiebflbbbaliceahjmenhehfaaica', // Замените на ID вашего расширения
-      { type: 'DELETE_TOKENS' },
-      response => {
-        if (response?.success) {
-          console.log('Токены успешно удалены расширением:', response.message);
-        } else {
-          console.error('Ошибка удаления токенов расширением:', response?.message);
-        }
-      }
-    );
 
     // Очищаем токены в Zustand и cookies
     clearTokens();
